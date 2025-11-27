@@ -1,0 +1,53 @@
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Header } from '@/components/layout/header'
+import { Footer } from '@/components/layout/footer'
+import Link from 'next/link'
+
+export default function Home() {
+  return (
+    <>
+      <Header />
+      <main className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-8">
+        <Card className="max-w-2xl w-full">
+          <CardHeader>
+            <CardTitle className="text-3xl">Welcome to Blog FE</CardTitle>
+            <CardDescription>
+              A modern Next.js 16 application with App Router
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground">
+              This project is built with the following technologies:
+            </p>
+            <ul className="list-disc list-inside space-y-2 text-sm">
+              <li>Next.js 16 with App Router</li>
+              <li>TypeScript</li>
+              <li>Tailwind CSS</li>
+              <li>shadcn/ui</li>
+              <li>TanStack Query (React Query)</li>
+              <li>Zustand for state management</li>
+              <li>React Hook Form with Zod validation</li>
+            </ul>
+            <div className="flex gap-4 pt-4">
+              <Button asChild>
+                <Link href="/about">About</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/blog">Blog</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+      <Footer />
+    </>
+  )
+}
+

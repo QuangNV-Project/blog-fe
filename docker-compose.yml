@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  blog-fe:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: blog-fe
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME}
+    restart: unless-stopped
+    networks:
+      - blog-network
+
+networks:
+  blog-network:
+    driver: bridge
+
