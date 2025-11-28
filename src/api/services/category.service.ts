@@ -1,5 +1,6 @@
 import { Category } from "@/types/category"
 import { axiosInstance } from "../axios"
+
 const CATEGORY_API_URL = '/api/blog/public/categories'
 
 const CATEGORY_ENDPOINTS = {
