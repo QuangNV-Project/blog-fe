@@ -54,33 +54,39 @@ export function BlogTable({
   onView,
 }: BlogTableProps) {
   return (
-    <div className="border rounded-lg">
+    <div className="border rounded-lg border-border/60 overflow-hidden bg-background/40">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead className="w-[80px]">Image</TableHead>
-            <TableHead>Title</TableHead>
-            <TableHead>Author</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Views</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead className="w-[80px]">Actions</TableHead>
+          <TableRow className="bg-muted/50 hover:bg-muted/50">
+            <TableHead className="w-[80px] font-semibold">Image</TableHead>
+            <TableHead className="font-semibold">Title</TableHead>
+            <TableHead className="font-semibold">Author</TableHead>
+            <TableHead className="font-semibold">Status</TableHead>
+            <TableHead className="font-semibold">Category</TableHead>
+            <TableHead className="font-semibold">Views</TableHead>
+            <TableHead className="font-semibold">Created</TableHead>
+            <TableHead className="w-[80px] font-semibold">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {posts.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-8">
-                <p className="text-muted-foreground">No blog posts found</p>
+              <TableCell colSpan={8} className="text-center py-16">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                    <Edit className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground font-medium">No blog posts found</p>
+                  <p className="text-sm text-muted-foreground">Create your first post to get started</p>
+                </div>
               </TableCell>
             </TableRow>
           ) : (
             posts.map((post) => (
-              <TableRow key={post.id}>
+              <TableRow key={post.id} className="hover:bg-muted/30 transition-colors">
                 <TableCell>
                   {post.featuredImage ? (
-                    <div className="relative w-16 h-16 rounded overflow-hidden">
+                    <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-border/40 shadow-sm">
                       <Image
                         src={post.featuredImage}
                         alt={post.title}
@@ -90,10 +96,8 @@ export function BlogTable({
                       />
                     </div>
                   ) : (
-                    <div className="w-16 h-16 rounded bg-muted flex items-center justify-center">
-                      <span className="text-xs text-muted-foreground">
-                        No image
-                      </span>
+                    <div className="w-16 h-16 rounded-lg bg-muted border border-border/40 flex items-center justify-center">
+                      <Edit className="h-5 w-5 text-muted-foreground" />
                     </div>
                   )}
                 </TableCell>

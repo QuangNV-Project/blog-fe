@@ -54,7 +54,7 @@ export function BlogFilters({
   const hasActiveFilters = filters.search || filters.status || filters.category
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-6 rounded-lg border border-border/40 bg-muted/30">
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Search */}
         <div className="relative flex-1">
@@ -63,7 +63,7 @@ export function BlogFilters({
             placeholder="Search by title or content..."
             value={filters.search || ''}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-9"
+            className="pl-9 bg-background/60 border-border/60"
           />
         </div>
 
@@ -72,7 +72,7 @@ export function BlogFilters({
           value={filters.status || 'all'}
           onValueChange={handleStatusChange}
         >
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px] bg-background/60 border-border/60">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -89,7 +89,7 @@ export function BlogFilters({
             value={filters.category || 'all'}
             onValueChange={handleCategoryChange}
           >
-            <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px] bg-background/60 border-border/60">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
@@ -110,6 +110,7 @@ export function BlogFilters({
             size="icon"
             onClick={handleClearFilters}
             title="Clear filters"
+            className="shrink-0"
           >
             <X className="h-4 w-4" />
           </Button>
