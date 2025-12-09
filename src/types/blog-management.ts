@@ -18,7 +18,7 @@ export interface BlogPost {
     updatedAt: string
   }
   
-  export interface CreateBlogPostDto {
+  export interface AuditBlogPostDto {
     title: string
     content: string
     excerpt?: string
@@ -27,8 +27,6 @@ export interface BlogPost {
     category?: string
     status?: 'draft' | 'published'
   }
-  
-  export interface UpdateBlogPostDto extends Partial<CreateBlogPostDto> {}
   
   export interface BlogFilterParams extends PaginationParams {
     status?: 'draft' | 'published' | 'archived' | 'all'

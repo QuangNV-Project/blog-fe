@@ -2,7 +2,7 @@ import axios from 'axios'
 import { env } from '@/config/env'
 
 export const axiosInstance = axios.create({
-  baseURL: env.apiUrl,
+  baseURL: env.BACK_END_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

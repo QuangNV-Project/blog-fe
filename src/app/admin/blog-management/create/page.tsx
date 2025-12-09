@@ -13,13 +13,13 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useCreateBlogPost } from '@/api/actions/blog-management/useBlogAdminMutations'
-import { CreateBlogPostDto } from '@/types/blog-management'
+import { AuditBlogPostDto } from '@/types/blog-management'
 
 export default function CreateBlogPostPage() {
   const router = useRouter()
   const createMutation = useCreateBlogPost()
 
-  const handleSubmit = async (data: CreateBlogPostDto) => {
+  const handleSubmit = async (data: AuditBlogPostDto): Promise<void> => {
     await createMutation.mutateAsync(data)
     router.push('/admin/blog-management')
   }

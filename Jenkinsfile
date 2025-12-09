@@ -1,27 +1,28 @@
 pipeline {
     agent any
 
-    tools {
-        // Đảm bảo bạn đã cấu hình NodeJS trong: Manage Jenkins -> Tools -> NodeJS
-        nodejs 'node24' 
-    }
-
     environment {
-        // Docker Hub credentials
+        // ================= CẤU HÌNH CHUNG =================
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        DOCKERHUB_IMAGE = 'quangnv1911/blog-fe' // Đã cập nhật tên image
-
+        DOCKERHUB_IMAGE = 'quangnv1911/blog-fe'
+        BUILD_OUTPUT_DIR = 'dist'
+        
+        // [NEW] Đường dẫn thư mục lưu cache trên máy chủ Jenkins (Host)
+        // Bạn có thể đổi đường dẫn này tùy ý
+        HOST_NPM_CACHE_DIR = '/home/quangnv_dev/npm/jenkins-npm-cache'
+        
+        // [UPDATE] Dùng bản 22-alpine (LTS) để ổn định nhất
+        NODE_IMAGE = 'node:22-alpine'
+        
         // Dynamic variables
         IMAGE_TAG = ''
         BRANCH_NAME = "${env.GIT_BRANCH.replaceFirst(/^origin\//, '')}"
         SHOULD_DEPLOY = 'false'
 
-        // NPM Cache config (Lưu cache vào workspace để Jenkins có thể archive)
-        NPM_CONFIG_CACHE = "${env.WORKSPACE}/.npm_cache"
-
         // Job data
         JOB_NAME = "${env.JOB_NAME}"
         BUILD_NUMBER = "${env.BUILD_NUMBER}"
+        // ==================================================
     }
 
     stages {
@@ -55,74 +56,60 @@ pipeline {
         }
 
         // ================================================
-        // 2️⃣ RESTORE NPM CACHE
-        // ================================================
-        stage('Restore NPM Cache') {
-            steps {
-                script {
-                    echo "Restoring NPM cache..."
-                    try {
-                        // Copy artifact từ lần build thành công trước đó để tăng tốc độ npm install
-                        copyArtifacts(projectName: env.JOB_NAME, selector: lastSuccessful(), filter: '.npm_cache/**', optional: true)
-                        echo "✅ NPM cache restored (if present)"
-                    } catch (err) {
-                        echo "No previous cache available: ${err}"
-                    }
-                }
-            }
-        }
-
-        // ================================================
-        // 3️⃣ BUILD APPLICATION (LINT, TYPE-CHECK, BUILD)
+        // 2️⃣ INSTALL DEPENDENCIES & BUILD APPLICATION
         // ================================================
         stage('Install & Build App') {
             steps {
-                // Chạy trong thư mục blog-fe
-                dir('blog-fe') {
-                    script {
-                        echo "Installing Dependencies..."
-                        sh 'npm ci --prefer-offline' // Sử dụng cache nếu có
+                script {
+                    // Chạy build trong Docker container với npm cache từ Host
+                    docker.image(NODE_IMAGE).inside("-u 0:0 -v ${HOST_NPM_CACHE_DIR}:/.npm") {
+                        
+                        echo "🔨 Installing Dependencies (With Cache)..."
+                        sh 'npm ci'
+                        
+                        echo "📝 Running Lint..."
+                        sh 'npm run lint || true'
 
-                        echo "Running Lint..."
-                        sh 'npm run lint'
-
-                        echo "Running Type Check..."
+                        echo "🔍 Running Type Check..."
                         sh 'npm run type-check'
 
-                        echo "Building Static Files..."
+                        echo "🔨 Building Next.js Application..."
                         sh 'npm run build'
+
+                        // [QUAN TRỌNG] Trả lại quyền sở hữu thư mục build cho user jenkins (UID 1000)
+                        // Nếu không có bước này, bước docker build phía sau sẽ lỗi Permission Denied
+                        sh 'chown -R 1000:1000 .next'
+                        sh 'chown -R 1000:1000 node_modules || true'
                     }
                 }
             }
         }
 
         // ================================================
-        // 4️⃣ BUILD & PUSH DOCKER IMAGE
+        // 3️⃣ BUILD & PUSH DOCKER IMAGE
         // ================================================
         stage('Build Docker Image') {
             when {
                 expression { SHOULD_DEPLOY == 'true' }
             }
             steps {
-                dir('blog-fe') { // Quan trọng: Build docker context từ thư mục source
-                    script {
-                        echo "Building Docker image..."
+                script {
+                    echo "🐳 Building Docker image..."
 
-                        // Pull cache cũ để build nhanh hơn
-                        sh """
-                            docker pull ${DOCKERHUB_IMAGE}:${IMAGE_TAG} || true
-                            docker pull ${DOCKERHUB_IMAGE}:latest || true
-                        """
+                    // Pull cache cũ để build nhanh hơn
+                    sh """
+                        docker pull ${DOCKERHUB_IMAGE}:${IMAGE_TAG} || true
+                        docker pull ${DOCKERHUB_IMAGE}:latest || true
+                    """
 
-                        // Build Docker image
-                        sh """
-                            docker build \
-                                --cache-from ${DOCKERHUB_IMAGE}:${IMAGE_TAG} \
-                                --cache-from ${DOCKERHUB_IMAGE}:latest \
-                                -t ${DOCKERHUB_IMAGE}:${IMAGE_TAG} .
-                        """
-                        echo "✅ Docker image built successfully"
-                    }
+                    // Build Docker image
+                    sh """
+                        docker build \
+                            --cache-from ${DOCKERHUB_IMAGE}:${IMAGE_TAG} \
+                            --cache-from ${DOCKERHUB_IMAGE}:latest \
+                            -t ${DOCKERHUB_IMAGE}:${IMAGE_TAG} .
+                    """
+                    echo "✅ Docker image built successfully"
                 }
             }
         }
@@ -133,7 +120,7 @@ pipeline {
             }
             steps {
                 script {
-                    echo "Pushing Docker image to Docker Hub..."
+                    echo "⬆️ Pushing Docker image to Docker Hub..."
                     
                     // Login Docker Hub
                     sh """
@@ -149,20 +136,7 @@ pipeline {
         }
 
         // ================================================
-        // 5️⃣ SAVE CACHE
-        // ================================================
-        stage('Save NPM Cache') {
-            steps {
-                script {
-                    echo "Saving NPM cache for future builds..."
-                    // Lưu lại thư mục cache để dùng cho build sau
-                    archiveArtifacts artifacts: '.npm_cache/**', onlyIfSuccessful: true, allowEmptyArchive: true
-                }
-            }
-        }
-
-        // ================================================
-        // 6️⃣ DEPLOY TO SERVERS
+        // 4️⃣ DEPLOY TO SERVERS
         // ================================================
         
         // --- DEPLOY DEV ---
@@ -195,20 +169,17 @@ pipeline {
                         """
 
                         // 3. Run New Container
-                        // Lưu ý: Đổi tên biến port thành BLOG_FE_PORT để tránh trùng với backend
                         sh """
                             ssh -o StrictHostKeyChecking=no -i $SSH_KEY -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST '
                                 ENV_FILE=".env.dev"
-                                PORT_VAR="BLOG_FE_PORT" 
+                                PORT_VAR="BLOG_PORT" 
                                 source ./infra/\${ENV_FILE}
                                 eval "PORT=\\\$\${PORT_VAR}"
 
                                 echo "Running Blog FE on DEV -> Port: \$PORT"
-
                                 docker run -d --name blog-fe \
                                 --env-file ./infra/\$ENV_FILE \
-                                --network dev-network \
-                                -p \$PORT:80 \
+                                -p \$PORT:3000 \
                                 --restart unless-stopped \
                                 ${DOCKERHUB_IMAGE}:${IMAGE_TAG}
                             '
@@ -248,16 +219,14 @@ pipeline {
                         sh """
                             ssh -o StrictHostKeyChecking=no -i $SSH_KEY -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST '
                                 ENV_FILE=".env.prod"
-                                PORT_VAR="BLOG_FE_PORT"
+                                PORT_VAR="BLOG_PORT"
                                 source ./infra/\${ENV_FILE}
                                 eval "PORT=\\\$\${PORT_VAR}"
 
                                 echo "Running Blog FE on PROD -> Port: \$PORT"
-
                                 docker run -d --name blog-fe \
                                 --env-file ./infra/\$ENV_FILE \
-                                --network prod-network \
-                                -p \$PORT:80 \
+                                -p \$PORT:3000 \
                                 --restart unless-stopped \
                                 ${DOCKERHUB_IMAGE}:${IMAGE_TAG}
                             '
@@ -274,8 +243,8 @@ pipeline {
     post {
         always {
             script {
-                echo "Pipeline execution completed"
-                cleanWs() // Dọn dẹp workspace
+                echo "✅ Pipeline execution completed"
+                cleanWs()
             }
         }
         success {

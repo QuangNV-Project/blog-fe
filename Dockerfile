@@ -50,5 +50,5 @@ RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
-CMD ["node", "server.js"]
+CMD ["sh", "-c", "PORT=3000 node server.js"]
 

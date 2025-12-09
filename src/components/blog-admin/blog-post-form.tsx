@@ -17,21 +17,18 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ImageUploader } from './image-uploader'
 import { RichTextEditor } from './rich-text-editer'
-import { useBlogCategories, useBlogTags } from '@/api/actions/blog-management/useBlogAdminQueries'
-import type {
-  CreateBlogPostDto,
-  UpdateBlogPostDto,
-  BlogPost,
-} from '@/api/services/blog-management.service'
+
 import { Loader2 } from 'lucide-react'
 import { blogPostSchema } from '@/schemas/blogSchema'
+import { AuditBlogPostDto, BlogPost } from '@/types/blog-management'
+import { useCategories } from '@/api/actions/category/useCategoryQueries'
 
 
 type BlogPostFormData = z.infer<typeof blogPostSchema>
 
 interface BlogPostFormProps {
   initialData?: BlogPost
-  onSubmit: (data: CreateBlogPostDto | UpdateBlogPostDto) => Promise<void>
+  onSubmit: (data: AuditBlogPostDto) => Promise<void>
   onCancel: () => void
   isSubmitting?: boolean
   isEdit?: boolean
@@ -44,8 +41,7 @@ export function BlogPostForm({
   isSubmitting = false,
   isEdit = false,
 }: Readonly<BlogPostFormProps>) {
-  const { data: categories } = useBlogCategories()
-  const { data: tags } = useBlogTags()
+  const { data: categories } = useCategories()
 
   const {
     register,

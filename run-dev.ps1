@@ -15,7 +15,7 @@ Set-Location $ProjectPath
 
 # Cài dependencies
 Write-Host "Installing dependencies..."
-& "$NodePortable\npm.cmd" install framer-motion
+& "$NodePortable\npm.cmd" run build
 
 # Chạy dev server React
 # Write-Host "Starting React dev server..."
