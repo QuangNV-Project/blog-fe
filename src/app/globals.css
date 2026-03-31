@@ -23,7 +23,14 @@
         --border: 214.3 31.8% 91.4%;
         --input: 214.3 31.8% 91.4%;
         --ring: 221.2 83.2% 53.3%;
-        --radius: 0.5rem;
+        --radius: 0.75rem;
+
+        /* Brand tokens (edu/SaaS style) */
+        --brand: 221.2 83.2% 53.3%; /* blue-600 */
+        --brand-foreground: 210 40% 98%;
+        --highlight: 45 93% 47%; /* amber-500 */
+        --highlight-foreground: 24 9.8% 10%;
+        --section: 210 40% 98%; /* slate-50-ish */
     }
 
     .dark {
@@ -46,6 +53,12 @@
         --border: 217.2 32.6% 17.5%;
         --input: 217.2 32.6% 17.5%;
         --ring: 224.3 76.3% 94.1%;
+
+        --brand: 217.2 91.2% 59.8%;
+        --brand-foreground: 222.2 84% 4.9%;
+        --highlight: 45 93% 47%;
+        --highlight-foreground: 222.2 84% 4.9%;
+        --section: 222.2 84% 6.5%;
     }
 }
 
@@ -55,7 +68,13 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground antialiased;
+    }
+}
+
+@layer base {
+    ::selection {
+        background: hsl(var(--primary) / 0.25);
     }
 }
 

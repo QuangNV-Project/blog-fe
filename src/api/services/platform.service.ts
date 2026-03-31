@@ -1,7 +1,7 @@
 import { axiosInstance } from '@/api/axios'
 import { UploadResponse } from '@/types/platform'
 
-const PLATFORM_API_URL = '/api/platform/private/storage'
+const PLATFORM_API_URL = '/platform/private/storage'
 
 const PLATFORM_ENDPOINTS = {
   UPLOAD_IMAGES: `${PLATFORM_API_URL}/upload/images`,

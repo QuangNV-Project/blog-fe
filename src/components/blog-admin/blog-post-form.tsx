@@ -22,6 +22,7 @@ import { Loader2 } from 'lucide-react'
 import { blogPostSchema } from '@/schemas/blogSchema'
 import { AuditBlogPostDto, BlogPost } from '@/types/blog-management'
 import { useCategories } from '@/api/actions/category/useCategoryQueries'
+import type { ContentType } from '@/types/blog-management'
 
 
 type BlogPostFormData = z.infer<typeof blogPostSchema>
@@ -41,8 +42,6 @@ export function BlogPostForm({
   isSubmitting = false,
   isEdit = false,
 }: Readonly<BlogPostFormProps>) {
-  const { data: categories } = useCategories()
-
   const {
     register,
     control,
@@ -57,11 +56,17 @@ export function BlogPostForm({
       content: initialData?.content || '',
       excerpt: initialData?.excerpt || '',
       featuredImage: initialData?.featuredImage || '',
-      category: initialData?.category || '',
+      category: initialData?.categoryId?.toString() || '',
+      contentType: initialData?.contentType || 'programming',
       tags: initialData?.tags || [],
       status: (initialData?.status as 'draft' | 'published') || 'draft',
     },
   })
+
+  const selectedContentType = watch('contentType') as ContentType
+  const selectedCategory = watch('category')
+  const { data: categories } = useCategories(selectedContentType)
+  const selectedCategoryExists = (categories || []).some((category) => category.id.toString() === selectedCategory)
 
   const onSubmitForm = async (data: BlogPostFormData) => {
     await onSubmit(data)
@@ -159,6 +164,34 @@ export function BlogPostForm({
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6 mt-6">
+          {/* Content Type */}
+          <div className="space-y-2">
+            <Label htmlFor="contentType">Section</Label>
+            <Controller
+              name="contentType"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={(value) => {
+                    field.onChange(value)
+                    setValue('category', '')
+                  }}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger id="contentType">
+                    <SelectValue placeholder="Select section" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="news">News</SelectItem>
+                    <SelectItem value="programming">Programming</SelectItem>
+                    <SelectItem value="gallery">Gallery</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+
           {/* Category */}
           <div className="space-y-2">
             <Label htmlFor="category">Category</Label>
@@ -176,15 +209,18 @@ export function BlogPostForm({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="">None</SelectItem>
-                    {categories?.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
+                      {categories?.map((category) => (
+                        <SelectItem key={category.id} value={category.id.toString()}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               )}
             />
+            {!selectedCategoryExists && selectedCategory && (
+              <p className="text-xs text-muted-foreground">Selected category is not available in this section.</p>
+            )}
           </div>
 
           {/* Status */}

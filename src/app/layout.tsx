@@ -4,7 +4,7 @@ import './globals.css'
 import { AppProviders } from '@/providers/AppProviders'
 import { Toaster } from '@/components/ui/sonner'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin', 'latin-ext'] })
 
 export const metadata: Metadata = {
   title: 'Blog FE - Next.js Application',

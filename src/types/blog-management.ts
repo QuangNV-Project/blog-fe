@@ -1,5 +1,7 @@
 import { PaginationParams } from "./common"
 
+export type ContentType = 'news' | 'programming' | 'gallery'
+
 export interface BlogPost {
     id: number
     title: string
@@ -10,8 +12,10 @@ export interface BlogPost {
     author: string
     authorId: number
     status: 'draft' | 'published' | 'archived'
+    contentType: ContentType
     tags?: string[]
     category?: string
+    categoryId?: number
     publishedAt?: string
     viewCount: number
     createdAt: string
@@ -25,11 +29,13 @@ export interface BlogPost {
     featuredImage?: string
     tags?: string[]
     category?: string
+    contentType?: ContentType
     status?: 'draft' | 'published'
   }
   
   export interface BlogFilterParams extends PaginationParams {
     status?: 'draft' | 'published' | 'archived' | 'all'
+    contentType?: ContentType
     search?: string
     category?: string
     tags?: string[]

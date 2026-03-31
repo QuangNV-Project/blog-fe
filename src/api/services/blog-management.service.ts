@@ -1,58 +1,64 @@
 import { axiosInstance } from '@/api/axios'
-import {  BlogFilterParams, BlogPost, CreateBlogPostDto, UpdateBlogPostDto } from '@/types/blog-management'
+import {  BlogFilterParams, BlogPost, AuditBlogPostDto } from '@/types/blog-management'
 import { PaginatedResponse } from '@/types/common'
 
-const BLOG_ADMIN_PRIVATE_API_URL = '/api/blog/private/blog-management'
-const BLOG_ADMIN_PUBLIC_API_URL = '/api/blog/public/blog-management'
+const BLOG_ADMIN_API_URL = '/fin-track/private/admin'
 
 const BLOG_ADMIN_ENDPOINTS = {
-  GET_POSTS: `${BLOG_ADMIN_PUBLIC_API_URL}`,
-  GET_POST_BY_ID: `${BLOG_ADMIN_PUBLIC_API_URL}/detail/:id`,
-  CREATE_POST: `${BLOG_ADMIN_PRIVATE_API_URL}/create`,
-  UPDATE_POST: `${BLOG_ADMIN_PRIVATE_API_URL}/update/:id`,
-  DELETE_POST: `${BLOG_ADMIN_PRIVATE_API_URL}/delete/:id`,
-  PUBLISH_POST: `${BLOG_ADMIN_PRIVATE_API_URL}/publish/:id`,
-  ARCHIVE_POST: `${BLOG_ADMIN_PRIVATE_API_URL}/archive/:id`,
+  GET_POSTS: `${BLOG_ADMIN_API_URL}/`,
+  GET_POST_BY_ID: `${BLOG_ADMIN_API_URL}/detail/:id`,
+  CREATE_POST: `${BLOG_ADMIN_API_URL}/create`,
+  UPDATE_POST: `${BLOG_ADMIN_API_URL}/update`,
+  DELETE_POST: `${BLOG_ADMIN_API_URL}/delete`,
+  PUBLISH_POST: `${BLOG_ADMIN_API_URL}/publish/:id`,
+  ARCHIVE_POST: `${BLOG_ADMIN_API_URL}/archive/:id`,
+}
+
+function unwrapApiResponse<T>(payload: any): T {
+  if (payload && typeof payload === 'object' && 'data' in payload) {
+    return payload.data as T
+  }
+  return payload as T
 }
 
 export const blogManagementService = {
   // Get all blog posts with filters
   async getPosts(params?: BlogFilterParams): Promise<PaginatedResponse<BlogPost>> {
     const response = await axiosInstance.get(BLOG_ADMIN_ENDPOINTS.GET_POSTS, { params })
-    return response.data
+    return unwrapApiResponse<PaginatedResponse<BlogPost>>(response.data)
   },
   // Get single blog post by ID
   async getPostById(id: number): Promise<BlogPost> {
     const response = await axiosInstance.get(BLOG_ADMIN_ENDPOINTS.GET_POST_BY_ID.replace(':id', id.toString()))
-    return response.data
+    return unwrapApiResponse<BlogPost>(response.data)
   },
   // Create new blog post
-  async createPost(data: CreateBlogPostDto): Promise<BlogPost> {
+  async createPost(data: AuditBlogPostDto): Promise<BlogPost> {
     const response = await axiosInstance.post(BLOG_ADMIN_ENDPOINTS.CREATE_POST, data)
-    return response.data
+    return unwrapApiResponse<BlogPost>(response.data)
   },
 
   // Update blog post
-  async updatePost(id: number, data: UpdateBlogPostDto): Promise<BlogPost> {
-    const response = await axiosInstance.patch(BLOG_ADMIN_ENDPOINTS.UPDATE_POST.replace(':id', id.toString()), data)
-    return response.data
+  async updatePost(id: number, data: AuditBlogPostDto): Promise<BlogPost> {
+    const response = await axiosInstance.post(BLOG_ADMIN_ENDPOINTS.UPDATE_POST, data, { params: { blogId: id } })
+    return unwrapApiResponse<BlogPost>(response.data)
   },
 
   // Delete blog post
   async deletePost(id: number): Promise<void> {
-    await axiosInstance.delete(BLOG_ADMIN_ENDPOINTS.DELETE_POST.replace(':id', id.toString()))
+    await axiosInstance.post(BLOG_ADMIN_ENDPOINTS.DELETE_POST, null, { params: { blogId: id } })
   },
 
   // Publish draft
   async publishPost(id: number): Promise<BlogPost> {
     const response = await axiosInstance.post(BLOG_ADMIN_ENDPOINTS.PUBLISH_POST.replace(':id', id.toString()))
-    return response.data
+    return unwrapApiResponse<BlogPost>(response.data)
   },
 
   // Archive post
   async archivePost(id: number): Promise<BlogPost> {
     const response = await axiosInstance.post(BLOG_ADMIN_ENDPOINTS.ARCHIVE_POST.replace(':id', id.toString()))
-    return response.data
+    return unwrapApiResponse<BlogPost>(response.data)
   },
 }
 

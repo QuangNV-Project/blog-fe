@@ -47,7 +47,7 @@ export default function BlogManagementPage() {
 
   // Queries
   const { data: postsData, isLoading } = useBlogPosts(filters)
-  const { data: categories } = useCategories()
+  const { data: categories } = useCategories(filters.contentType)
   const deleteMutation = useDeleteBlogPost()
   const publishMutation = usePublishBlogPost()
   const archiveMutation = useArchiveBlogPost()

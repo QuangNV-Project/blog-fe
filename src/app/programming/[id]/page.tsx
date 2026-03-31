@@ -1,6 +1,5 @@
 import { ContentDetailPage } from '@/components/content/content-detail-page'
 
-export default function BlogPostPage() {
+export default function Page() {
   return <ContentDetailPage contentType="programming" />
 }
-

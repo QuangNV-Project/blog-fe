@@ -36,6 +36,15 @@ export function BlogFilters({
     })
   }
 
+  const handleContentTypeChange = (value: string) => {
+    onFilterChange({
+      ...filters,
+      contentType: value === 'all' ? undefined : (value as BlogFilterParams['contentType']),
+      category: undefined,
+      page: 1,
+    })
+  }
+
   const handleCategoryChange = (value: string) => {
     onFilterChange({
       ...filters,
@@ -51,7 +60,7 @@ export function BlogFilters({
     })
   }
 
-  const hasActiveFilters = filters.search || filters.status || filters.category
+  const hasActiveFilters = filters.search || filters.status || filters.category || filters.contentType
 
   return (
     <div className="space-y-4 p-6 rounded-lg border border-border/40 bg-muted/30">
@@ -80,6 +89,21 @@ export function BlogFilters({
             <SelectItem value="draft">Draft</SelectItem>
             <SelectItem value="published">Published</SelectItem>
             <SelectItem value="archived">Archived</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={filters.contentType || 'all'}
+          onValueChange={handleContentTypeChange}
+        >
+          <SelectTrigger className="w-full sm:w-[180px] bg-background/60 border-border/60">
+            <SelectValue placeholder="Section" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Sections</SelectItem>
+            <SelectItem value="news">News</SelectItem>
+            <SelectItem value="programming">Programming</SelectItem>
+            <SelectItem value="gallery">Gallery</SelectItem>
           </SelectContent>
         </Select>
 

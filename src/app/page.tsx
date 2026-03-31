@@ -37,10 +37,10 @@ export default function Home() {
             </ul>
             <div className="flex gap-4 pt-4">
               <Button asChild>
-                <Link href="/about">About</Link>
+                <Link href="/content">Content Hub</Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/blog">Blog</Link>
+                <Link href="/programming">Programming</Link>
               </Button>
             </div>
           </CardContent>

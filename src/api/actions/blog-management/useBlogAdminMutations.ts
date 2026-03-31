@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { CreateBlogPostDto, UpdateBlogPostDto } from "@/types/blog-management"
+import { AuditBlogPostDto } from "@/types/blog-management"
 import { blogManagementService } from "@/api/services/blog-management.service"
 import { blogKeys } from "../blog/useBlogQueries"
 
@@ -9,7 +9,7 @@ export function useCreateBlogPost() {
     const queryClient = useQueryClient()
   
     return useMutation({
-      mutationFn: (data: CreateBlogPostDto) =>
+      mutationFn: (data: AuditBlogPostDto) =>
         blogManagementService.createPost(data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: blogKeys.lists() })
@@ -28,7 +28,7 @@ export function useCreateBlogPost() {
     const queryClient = useQueryClient()
   
     return useMutation({
-      mutationFn: ({ id, data }: { id: number; data: UpdateBlogPostDto }) =>
+      mutationFn: ({ id, data }: { id: number; data: AuditBlogPostDto }) =>
         blogManagementService.updatePost(id, data),
       onSuccess: (_, variables) => {
         queryClient.invalidateQueries({ queryKey: blogKeys.lists() })

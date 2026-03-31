@@ -7,9 +7,12 @@ export interface PaginationParams {
 
 export interface PaginatedResponse<T> {
   data: T[]
-  totalPages: number
-  totalItems: number
-  currentPage: number
+  meta: {
+    total: number
+    totalPages: number
+    page: number
+    limit: number
+  }
 }
 
 export interface ApiError {

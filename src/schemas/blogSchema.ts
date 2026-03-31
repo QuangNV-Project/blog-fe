@@ -6,6 +6,7 @@ export const blogPostSchema = z.object({
   excerpt: z.string().max(500, 'Excerpt is too long').optional(),
   featuredImage: z.string().url('Must be a valid URL').optional().or(z.literal('')),
   category: z.string().optional(),
+  contentType: z.enum(['news', 'programming', 'gallery']).default('programming'),
   tags: z.array(z.string()).optional(),
   status: z.enum(['draft', 'published']).default('draft'),
 })

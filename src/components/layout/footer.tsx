@@ -1,15 +1,14 @@
 import Link from 'next/link'
+import { env } from '@/config/env'
 
 export function Footer() {
   return (
-    <footer className="border-t bg-background">
+    <footer className="border-t bg-section">
       <div className="container py-8 md:py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold">Blog FE</h3>
-            <p className="text-sm text-muted-foreground">
-              A modern blog application built with Next.js 16
-            </p>
+            <h3 className="text-lg font-semibold">{env.appName}</h3>
+            <p className="text-sm text-muted-foreground">A clean, modern blog experience.</p>
           </div>
           <div className="space-y-3">
             <h4 className="text-sm font-semibold">Quick Links</h4>
@@ -24,10 +23,18 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/blog"
+                  href="/news"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
-                  Blog
+                  Browse
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/content"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Content hub
                 </Link>
               </li>
               <li>
@@ -76,29 +83,15 @@ export function Footer() {
             </ul>
           </div>
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold">Legal</h4>
+            <h4 className="text-sm font-semibold">Contact</h4>
             <ul className="space-y-2 text-sm">
-              <li>
-                <Link
-                  href="/privacy"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/terms"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Terms of Service
-                </Link>
-              </li>
+              <li className="text-muted-foreground">Email: support@example.com</li>
+              <li className="text-muted-foreground">Hours: Mon–Fri, 9:00–18:00</li>
             </ul>
           </div>
         </div>
         <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>© 2024 Blog FE. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {env.appName}. All rights reserved.</p>
         </div>
       </div>
     </footer>
