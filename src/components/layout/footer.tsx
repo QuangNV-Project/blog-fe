@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { env } from '@/config/env'
+import { FooterHomeLink } from '@/components/layout/footer-home-link'
 
 export function Footer() {
   return (
@@ -14,12 +15,9 @@ export function Footer() {
             <h4 className="text-sm font-semibold">Quick Links</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link
-                  href="/"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
+                <FooterHomeLink className="text-muted-foreground hover:text-primary transition-colors">
                   Home
-                </Link>
+                </FooterHomeLink>
               </li>
               <li>
                 <Link

@@ -30,10 +30,10 @@ export function middleware(request: NextRequest) {
       headers: requestHeaders,
     },
   })
-  response.headers.set('X-Frame-Options', 'DENY')
-  response.headers.set('X-Content-Type-Options', 'nosniff')
-  response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
-  response.headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self'")
+  // response.headers.set('X-Frame-Options', 'DENY')
+  // response.headers.set('X-Content-Type-Options', 'nosniff')
+  // response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
+  // response.headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self'")
 
   return response
 }

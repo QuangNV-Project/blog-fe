@@ -7,13 +7,16 @@ import { env } from '@/config/env'
 import { Badge } from '@/components/ui/badge'
 import { SectionSwitcher } from '@/components/layout/section-switcher'
 import { UserAccountMenu } from '@/components/layout/user-account-menu'
+import { useRoleHomePath } from '@/hooks/use-role-home-path'
 
 export function Header() {
+  const { homePath } = useRoleHomePath()
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-4 md:gap-6">
-          <Link href="/" className="flex shrink-0 items-center gap-3">
+          <Link href={homePath} className="flex shrink-0 items-center gap-3">
             <span className="font-semibold text-lg tracking-tight">{env.appName}</span>
             <Badge variant="highlight" className="hidden sm:inline-flex">
               Edu layout
@@ -21,7 +24,7 @@ export function Header() {
           </Link>
           <SectionSwitcher />
           <nav className="hidden items-center gap-5 lg:flex">
-            <Link href="/" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link href={homePath} className="text-sm font-medium transition-colors hover:text-primary">
               Home
             </Link>
             <Link href="/content" className="text-sm font-medium transition-colors hover:text-primary">

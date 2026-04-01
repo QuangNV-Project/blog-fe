@@ -15,6 +15,11 @@ interface ImageUploaderProps {
   description?: string
   maxSizeMB?: number
   aspectRatio?: string
+  /** Smaller dropzone, icons, and copy for sidebars / dense forms */
+  compact?: boolean
+  /** Grow to match a sibling column (dropzone uses flex-1 instead of fixed aspect). */
+  fillColumn?: boolean
+  className?: string
 }
 
 export function ImageUploader({
@@ -25,6 +30,9 @@ export function ImageUploader({
   description = 'Upload a featured image for your blog post',
   maxSizeMB = 5,
   aspectRatio = 'aspect-video',
+  compact = false,
+  fillColumn = false,
+  className,
 }: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false)
   const uploadMutation = useUploadBlogImages()
@@ -92,16 +100,52 @@ export function ImageUploader({
     onRemove?.()
   }, [onChange, onRemove])
 
+  const boxAspect =
+    compact && !fillColumn ? 'aspect-[5/3] max-h-36' : !fillColumn ? aspectRatio : ''
+  const dropPadding = compact ? 'p-4' : 'p-8'
+  const iconWrap = compact ? 'p-2' : 'p-4'
+  const iconSize = compact ? 'h-5 w-5' : 'h-8 w-8'
+  const loaderSize = compact ? 'h-8 w-8' : 'h-12 w-12'
+
+  const dropGrowClass = fillColumn ? 'flex-1 min-h-[160px] w-full' : ''
+  const previewGrowClass = fillColumn ? 'flex-1 min-h-[180px] w-full' : ''
+
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium">{label}</label>
+    <div
+      className={cn(
+        fillColumn ? 'flex h-full min-h-0 flex-col gap-1.5' : 'space-y-2',
+        !fillColumn && compact && 'space-y-1.5',
+        className
+      )}
+    >
+      <label
+        className={cn(
+          'font-medium shrink-0',
+          compact ? 'text-xs' : 'text-sm'
+        )}
+      >
+        {label}
+      </label>
       {description && (
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <p
+          className={cn(
+            'text-muted-foreground shrink-0',
+            compact ? 'text-[11px] leading-snug' : 'text-sm'
+          )}
+        >
+          {description}
+        </p>
       )}
 
       {value ? (
-        <div className="relative group">
-          <div className={cn('relative overflow-hidden rounded-lg', aspectRatio)}>
+        <div className={cn('relative group', fillColumn && 'flex min-h-0 flex-1 flex-col')}>
+          <div
+            className={cn(
+              'relative overflow-hidden rounded-lg',
+              boxAspect,
+              fillColumn && previewGrowClass
+            )}
+          >
             <Image
               src={value}
               alt="Preview"
@@ -127,8 +171,10 @@ export function ImageUploader({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           className={cn(
-            'relative border-2 border-dashed rounded-lg p-8 transition-colors',
-            aspectRatio,
+            'relative border-2 border-dashed rounded-lg transition-colors',
+            dropPadding,
+            boxAspect,
+            dropGrowClass,
             isDragging
               ? 'border-primary bg-primary/5'
               : 'border-muted-foreground/25 hover:border-primary/50',
@@ -142,27 +188,41 @@ export function ImageUploader({
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             disabled={uploadMutation.isPending}
           />
-          <div className="flex flex-col items-center justify-center gap-4 h-full">
+          <div
+            className={cn(
+              'flex flex-col items-center justify-center h-full',
+              compact ? 'gap-2' : 'gap-4'
+            )}
+          >
             {uploadMutation.isPending ? (
               <>
-                <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Uploading...</p>
+                <Loader2 className={cn(loaderSize, 'animate-spin text-primary')} />
+                <p className={cn('text-muted-foreground', compact ? 'text-xs' : 'text-sm')}>
+                  Uploading...
+                </p>
               </>
             ) : (
               <>
-                <div className="rounded-full bg-primary/10 p-4">
-                  <ImageIcon className="h-8 w-8 text-primary" />
+                <div className={cn('rounded-full bg-primary/10', iconWrap)}>
+                  <ImageIcon className={cn(iconSize, 'text-primary')} />
                 </div>
-                <div className="text-center">
-                  <p className="text-sm font-medium">
-                    Drag and drop your image here
+                <div className="text-center px-1">
+                  <p className={cn('font-medium', compact ? 'text-xs' : 'text-sm')}>
+                    {compact ? 'Drop or click' : 'Drag and drop your image here'}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    or click to browse (max {maxSizeMB}MB)
-                  </p>
+                  {!compact && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      or click to browse (max {maxSizeMB}MB)
+                    </p>
+                  )}
                 </div>
-                <Button type="button" variant="outline" size="sm">
-                  <Upload className="h-4 w-4 mr-2" />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className={compact ? 'h-7 text-xs' : undefined}
+                >
+                  <Upload className={cn(compact ? 'h-3 w-3' : 'h-4 w-4', 'mr-2')} />
                   Choose File
                 </Button>
               </>

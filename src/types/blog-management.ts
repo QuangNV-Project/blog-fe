@@ -18,10 +18,15 @@ export interface BlogPost {
     categoryId?: number
     publishedAt?: string
     viewCount: number
+    featured?: boolean
+    sortOrder?: number
     createdAt: string
     updatedAt: string
   }
   
+  /** Alias for update mutations (same shape as create body). */
+  export type UpdateBlogPostDto = AuditBlogPostDto
+
   export interface AuditBlogPostDto {
     title: string
     content: string
@@ -31,6 +36,8 @@ export interface BlogPost {
     category?: string
     contentType?: ContentType
     status?: 'draft' | 'published'
+    featured?: boolean
+    sortOrder?: number
   }
   
   export interface BlogFilterParams extends PaginationParams {

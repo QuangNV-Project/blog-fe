@@ -17,12 +17,15 @@ interface BlogFiltersProps {
   filters: BlogFilterParams
   onFilterChange: (filters: BlogFilterParams) => void
   categories?: Category[]
+  /** When set, section filter is hidden and this type is preserved on clear. */
+  lockedContentType?: BlogFilterParams['contentType']
 }
 
 export function BlogFilters({
   filters,
   onFilterChange,
   categories = [],
+  lockedContentType,
 }: Readonly<BlogFiltersProps>) {
   const handleSearchChange = (value: string) => {
     onFilterChange({ ...filters, search: value, page: 1 })
@@ -57,10 +60,15 @@ export function BlogFilters({
     onFilterChange({
       page: 1,
       limit: filters.limit,
+      ...(lockedContentType ? { contentType: lockedContentType } : {}),
     })
   }
 
-  const hasActiveFilters = filters.search || filters.status || filters.category || filters.contentType
+  const hasActiveFilters =
+    filters.search ||
+    filters.status ||
+    filters.category ||
+    (!lockedContentType && filters.contentType)
 
   return (
     <div className="space-y-4 p-6 rounded-lg border border-border/40 bg-muted/30">
@@ -92,20 +100,22 @@ export function BlogFilters({
           </SelectContent>
         </Select>
 
-        <Select
-          value={filters.contentType || 'all'}
-          onValueChange={handleContentTypeChange}
-        >
-          <SelectTrigger className="w-full sm:w-[180px] bg-background/60 border-border/60">
-            <SelectValue placeholder="Section" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Sections</SelectItem>
-            <SelectItem value="news">News</SelectItem>
-            <SelectItem value="programming">Programming</SelectItem>
-            <SelectItem value="gallery">Gallery</SelectItem>
-          </SelectContent>
-        </Select>
+        {!lockedContentType && (
+          <Select
+            value={filters.contentType || 'all'}
+            onValueChange={handleContentTypeChange}
+          >
+            <SelectTrigger className="w-full sm:w-[180px] bg-background/60 border-border/60">
+              <SelectValue placeholder="Section" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Sections</SelectItem>
+              <SelectItem value="news">News</SelectItem>
+              <SelectItem value="programming">Programming</SelectItem>
+              <SelectItem value="gallery">Gallery</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
 
         {/* Category Filter */}
         {categories.length > 0 && (

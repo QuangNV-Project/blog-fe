@@ -26,7 +26,7 @@ import {
   Archive,
   Send,
 } from 'lucide-react'
-import type { BlogPost } from '@/api/services/blog-management.service'
+import type { BlogPost } from '@/types/blog-management'
 import { format } from 'date-fns'
 import Image from 'next/image'
 
@@ -63,6 +63,8 @@ export function BlogTable({
             <TableHead className="font-semibold">Author</TableHead>
             <TableHead className="font-semibold">Status</TableHead>
             <TableHead className="font-semibold">Category</TableHead>
+            <TableHead className="font-semibold w-[90px]">Featured</TableHead>
+            <TableHead className="font-semibold w-[80px]">Sort</TableHead>
             <TableHead className="font-semibold">Views</TableHead>
             <TableHead className="font-semibold">Created</TableHead>
             <TableHead className="w-[80px] font-semibold">Actions</TableHead>
@@ -71,7 +73,7 @@ export function BlogTable({
         <TableBody>
           {posts.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-16">
+              <TableCell colSpan={10} className="text-center py-16">
                 <div className="flex flex-col items-center gap-2">
                   <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
                     <Edit className="h-6 w-6 text-muted-foreground" />
@@ -119,6 +121,14 @@ export function BlogTable({
                   </Badge>
                 </TableCell>
                 <TableCell>{post.category || '-'}</TableCell>
+                <TableCell>
+                  {post.featured ? (
+                    <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30">Yes</Badge>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">—</span>
+                  )}
+                </TableCell>
+                <TableCell className="tabular-nums text-muted-foreground">{post.sortOrder ?? 0}</TableCell>
                 <TableCell>{post.viewCount || 0}</TableCell>
                 <TableCell>
                   {format(new Date(post.createdAt), 'MMM dd, yyyy')}

@@ -1,3 +1,5 @@
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -9,8 +11,18 @@ import {
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import Link from 'next/link'
+import { decodeJwtPayload, isAdminFromRoles } from '@/lib/jwt-payload'
 
-export default function Home() {
+export default async function Home() {
+  const cookieStore = await cookies()
+  const token = cookieStore.get('access-token')?.value
+  if (token) {
+    const payload = decodeJwtPayload(token)
+    if (payload?.type !== 'refresh' && isAdminFromRoles(payload?.roles)) {
+      redirect('/admin/content')
+    }
+  }
+
   return (
     <>
       <Header />

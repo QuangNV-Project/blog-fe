@@ -1,5 +1,6 @@
 export type AuthExchangeCodeReq = {
     code: string;
+    type: string | null;
 }
 
 export type LoginMutationResponse = {

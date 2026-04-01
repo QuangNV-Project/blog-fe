@@ -93,7 +93,7 @@ export function SectionSwitcher() {
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Quản trị</DropdownMenuLabel>
             <DropdownMenuItem
-              onSelect={() => router.push('/admin/blog-management')}
+              onSelect={() => router.push('/admin/content')}
               className={current === 'admin' ? 'bg-primary/10 font-medium' : ''}
             >
               Blog management
