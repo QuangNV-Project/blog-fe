@@ -11,7 +11,7 @@ export function buildAuthLoginUrl(origin: string, returnPath: string): string {
 }
 
 export function buildAuthRegisterUrl(origin: string, returnPath: string): string {
-  const explicit = env.AUTH_REGISTER_URL
+  const explicit = env.AUTH_URL
   const base =
     explicit ||
     (env.AUTH_URL ? env.AUTH_URL.replace(/\/login\/?$/i, '/register') : '')
