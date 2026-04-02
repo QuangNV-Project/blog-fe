@@ -1,7 +1,7 @@
 'use client'
 
+import { memo, useCallback, useMemo } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 import { ChevronDown, LayoutGrid } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,11 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { contentTypeLabel, contentTypeRoute } from '@/components/content/content-config'
 import type { ContentType } from '@/types/blog-management'
-
-type SessionState = {
-  loaded: boolean
-  isAdmin: boolean
-}
+import { useAuthSessionQuery } from '@/hooks/use-auth-session-query'
 
 const CONTENT_TYPES: ContentType[] = ['news', 'programming', 'gallery']
 
@@ -30,35 +26,38 @@ function pathToSection(pathname: string): 'news' | 'programming' | 'gallery' | '
   return null
 }
 
-export function SectionSwitcher() {
+function SectionSwitcherComponent() {
   const pathname = usePathname()
   const router = useRouter()
-  const [session, setSession] = useState<SessionState>({ loaded: false, isAdmin: false })
+  const { data, isPending } = useAuthSessionQuery()
 
-  useEffect(() => {
-    let cancelled = false
-    fetch('/api/auth/session')
-      .then((res) => res.json())
-      .then((data: { isAdmin?: boolean }) => {
-        if (!cancelled) {
-          setSession({ loaded: true, isAdmin: Boolean(data.isAdmin) })
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setSession({ loaded: true, isAdmin: false })
-      })
-    return () => {
-      cancelled = true
+  const current = useMemo(() => pathToSection(pathname), [pathname])
+
+  const label = useMemo(() => {
+    switch (current) {
+      case 'admin':
+        return 'Admin'
+      case 'news':
+      case 'programming':
+      case 'gallery':
+        return contentTypeLabel[current]
+      default:
+        return 'Chọn khu vực'
     }
-  }, [])
+  }, [current])
 
-  const current = pathToSection(pathname)
-  const label =
-    current === 'admin'
-      ? 'Admin'
-      : current && current !== 'admin'
-        ? contentTypeLabel[current]
-        : 'Chọn khu vực'
+  const goToContentType = useCallback(
+    (type: ContentType) => {
+      router.push(contentTypeRoute[type])
+    },
+    [router]
+  )
+
+  const goToAdminContent = useCallback(() => {
+    router.push('/admin/content')
+  }, [router])
+
+  const showAdmin = !isPending && Boolean(data?.isAdmin)
 
   return (
     <DropdownMenu>
@@ -82,18 +81,18 @@ export function SectionSwitcher() {
         {CONTENT_TYPES.map((type) => (
           <DropdownMenuItem
             key={type}
-            onSelect={() => router.push(contentTypeRoute[type])}
+            onSelect={() => goToContentType(type)}
             className={current === type ? 'bg-primary/10 font-medium' : ''}
           >
             {contentTypeLabel[type]}
           </DropdownMenuItem>
         ))}
-        {session.loaded && session.isAdmin && (
+        {showAdmin && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Quản trị</DropdownMenuLabel>
             <DropdownMenuItem
-              onSelect={() => router.push('/admin/content')}
+              onSelect={goToAdminContent}
               className={current === 'admin' ? 'bg-primary/10 font-medium' : ''}
             >
               Blog management
@@ -104,3 +103,5 @@ export function SectionSwitcher() {
     </DropdownMenu>
   )
 }
+
+export const SectionSwitcher = memo(SectionSwitcherComponent)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { usePathname, useRouter } from 'next/navigation'
 import { Loader2, LogIn, LogOut, UserPlus } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -15,14 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { buildAuthLoginUrl, buildAuthRegisterUrl } from '@/lib/auth-urls'
 import { env } from '@/config/env'
-
-type SessionPayload = {
-  authenticated: boolean
-  isAdmin?: boolean
-  userName: string | null
-  userId: number | null
-  roles?: string[]
-}
+import { authSessionQueryKey, useAuthSessionQuery } from '@/hooks/use-auth-session-query'
 
 function initialsFromName(name: string | null): string {
   if (!name?.trim()) return '?'
@@ -36,27 +29,14 @@ function initialsFromName(name: string | null): string {
 export function UserAccountMenu() {
   const pathname = usePathname()
   const router = useRouter()
-  const [session, setSession] = useState<SessionPayload | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  const load = useCallback(() => {
-    setLoading(true)
-    fetch('/api/auth/session')
-      .then((r) => r.json())
-      .then((data: SessionPayload) => setSession(data))
-      .catch(() => setSession({ authenticated: false, userName: null, userId: null }))
-      .finally(() => setLoading(false))
-  }, [])
-
-  useEffect(() => {
-    load()
-  }, [load])
+  const queryClient = useQueryClient()
+  const { data: session, isPending } = useAuthSessionQuery()
 
   const logout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' })
     } finally {
-      setSession({ authenticated: false, userName: null, userId: null })
+      await queryClient.invalidateQueries({ queryKey: authSessionQueryKey })
       router.refresh()
       router.push('/')
     }
@@ -68,7 +48,7 @@ export function UserAccountMenu() {
   const loginHref = origin && authConfigured ? buildAuthLoginUrl(origin, returnPath) : '#'
   const registerHref = origin && authConfigured ? buildAuthRegisterUrl(origin, returnPath) : '#'
 
-  if (loading) {
+  if (isPending) {
     return (
       <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" disabled aria-label="Đang tải tài khoản">
         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
