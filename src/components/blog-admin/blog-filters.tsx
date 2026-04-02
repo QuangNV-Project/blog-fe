@@ -34,7 +34,7 @@ export function BlogFilters({
   const handleStatusChange = (value: string) => {
     onFilterChange({
       ...filters,
-      status: value === 'all' ? undefined : (value as any),
+      status: value === 'all' ? undefined : (value as BlogFilterParams['status']),
       page: 1,
     })
   }

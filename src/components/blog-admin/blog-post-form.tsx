@@ -156,6 +156,7 @@ export function BlogPostForm({
       return
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { category: _c, ...rest } = data
     await onSubmit({
       ...(rest as unknown as AuditBlogPostDto),

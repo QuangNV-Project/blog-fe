@@ -32,14 +32,12 @@ import { useUploadBlogImages } from '@/api/actions/platform/usePlatformMutations
 interface RichTextEditorProps {
   content: string
   onChange: (content: string) => void
-  placeholder?: string
   disabled?: boolean
 }
 
 export function RichTextEditor({
   content,
   onChange,
-  placeholder = 'Write your blog content here...',
   disabled = false,
 }: RichTextEditorProps) {
   const uploadMutation = useUploadBlogImages()
