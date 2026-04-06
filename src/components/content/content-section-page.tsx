@@ -13,7 +13,7 @@ import { Search, Calendar, ArrowRight } from 'lucide-react'
 import { useBlogPosts } from '@/api/actions/blog/useBlogQueries'
 import { useCategories } from '@/api/actions/category/useCategoryQueries'
 import { contentTypeLabel, contentTypeRoute } from './content-config'
-import type { ContentType } from '@/types/blog-management'
+import type { ContentType, NewsCategory } from '@/types/blog-management'
 
 interface Props {
   contentType: ContentType
@@ -22,6 +22,7 @@ interface Props {
 export function ContentSectionPage({ contentType }: Readonly<Props>) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<'all' | string>('all')
+  const [newsCategory, setNewsCategory] = useState<NewsCategory>('general')
 
   const { data: categoriesData } = useCategories(contentType)
   const { data: postsData, isLoading } = useBlogPosts({
@@ -29,10 +30,17 @@ export function ContentSectionPage({ contentType }: Readonly<Props>) {
     limit: 12,
     status: 'published',
     contentType,
+    newsCategory: contentType === 'news' ? newsCategory : undefined,
     search: searchQuery || undefined,
     category: selectedCategory === 'all' ? undefined : selectedCategory,
   })
   const posts = postsData?.data ?? []
+
+  const newsTabs: Array<{ id: NewsCategory; label: string }> = [
+    { id: 'general', label: 'News' },
+    { id: 'stock', label: 'Chứng khoán' },
+    { id: 'coin', label: 'Coin' },
+  ]
 
   return (
     <>
@@ -55,6 +63,21 @@ export function ContentSectionPage({ contentType }: Readonly<Props>) {
         </section>
 
         <div className="container py-10 space-y-8">
+          {contentType === 'news' && (
+            <section className="flex items-center gap-3 overflow-x-auto pb-1">
+              {newsTabs.map((tab) => (
+                <Button
+                  key={tab.id}
+                  variant={newsCategory === tab.id ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setNewsCategory(tab.id)}
+                >
+                  {tab.label}
+                </Button>
+              ))}
+            </section>
+          )}
+
           <section className="flex items-center gap-3 overflow-x-auto pb-1">
             <Button
               variant={selectedCategory === 'all' ? 'default' : 'outline'}
@@ -118,6 +141,11 @@ export function ContentSectionPage({ contentType }: Readonly<Props>) {
                       <CardTitle className="line-clamp-2">{post.title}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
+                      {post.sourceName && (
+                        <Badge variant="outline" className="w-fit">
+                          {post.sourceName}
+                        </Badge>
+                      )}
                       <p className="line-clamp-2 text-sm text-muted-foreground">{post.excerpt}</p>
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">

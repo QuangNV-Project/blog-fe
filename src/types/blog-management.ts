@@ -1,6 +1,7 @@
 import { PaginationParams } from "./common"
 
 export type ContentType = 'news' | 'programming' | 'gallery'
+export type NewsCategory = 'general' | 'stock' | 'coin'
 
 export interface BlogPost {
     id: number
@@ -13,6 +14,7 @@ export interface BlogPost {
     authorId: number
     status: 'draft' | 'published' | 'archived'
     contentType: ContentType
+    newsCategory?: NewsCategory
     tags?: string[]
     category?: string
     categoryId?: number
@@ -20,8 +22,19 @@ export interface BlogPost {
     viewCount: number
     featured?: boolean
     sortOrder?: number
+    sourceName?: string
+    sourceUrl?: string
+    externalNews?: boolean
+    fetchedAt?: string
     createdAt: string
     updatedAt: string
+  }
+
+  export interface ExternalNewsDetail {
+    title: string
+    sourceUrl: string
+    sourceName: string
+    contentHtml: string
   }
   
   /** Alias for update mutations (same shape as create body). */
@@ -48,5 +61,6 @@ export interface BlogPost {
     tags?: string[]
     dateFrom?: string
     dateTo?: string
+    newsCategory?: NewsCategory
   }
   

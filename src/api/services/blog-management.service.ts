@@ -1,11 +1,12 @@
 import { axiosInstance } from '@/api/axios'
-import { BlogFilterParams, BlogPost, AuditBlogPostDto } from '@/types/blog-management'
+import { BlogFilterParams, BlogPost, AuditBlogPostDto, ExternalNewsDetail } from '@/types/blog-management'
 import { PaginatedResponse } from '@/types/common'
 
 /** Paths are resolved against `axios` baseURL (browser: `/api/proxy`, server: backend origin). */
 const BLOG_ADMIN_ENDPOINTS = {
   GET_POSTS: '/blog/public/blog-management/all',
   GET_POST_BY_ID: '/blog/public/blog-management/detail/:id',
+  GET_EXTERNAL_NEWS_DETAIL: '/blog/public/blog-management/external-detail',
   CREATE_POST: '/blog/private/blog-management/create',
   UPDATE_POST: '/blog/private/blog-management/update',
   DELETE_POST: '/blog/private/blog-management/delete',
@@ -26,6 +27,14 @@ export const blogManagementService = {
   async getPostById(id: number): Promise<BlogPost> {
     const { data } = await axiosInstance.get<BlogPost>(
       BLOG_ADMIN_ENDPOINTS.GET_POST_BY_ID.replace(':id', id.toString())
+    )
+    return data
+  },
+  // Get external article detail by source URL
+  async getExternalNewsDetail(url: string): Promise<ExternalNewsDetail> {
+    const { data } = await axiosInstance.get<ExternalNewsDetail>(
+      BLOG_ADMIN_ENDPOINTS.GET_EXTERNAL_NEWS_DETAIL,
+      { params: { url } }
     )
     return data
   },

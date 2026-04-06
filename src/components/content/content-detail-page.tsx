@@ -8,7 +8,7 @@ import { Footer } from '@/components/layout/footer'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, ArrowLeft } from 'lucide-react'
-import { useBlogPost, useBlogPosts } from '@/api/actions/blog/useBlogQueries'
+import { useBlogPost, useBlogPosts, useExternalNewsDetail } from '@/api/actions/blog/useBlogQueries'
 import { contentTypeLabel, contentTypeRoute } from './content-config'
 import type { ContentType } from '@/types/blog-management'
 
@@ -20,6 +20,8 @@ export function ContentDetailPage({ contentType }: Readonly<Props>) {
   const params = useParams<{ id: string }>()
   const id = Number(params.id)
   const { data: post, isLoading } = useBlogPost(id)
+  const externalUrl = post?.externalNews ? post.sourceUrl : undefined
+  const { data: externalDetail, isLoading: isExternalLoading, isError: isExternalError } = useExternalNewsDetail(externalUrl)
   const { data: relatedData } = useBlogPosts({ page: 1, limit: 3, status: 'published', contentType })
   const relatedPosts = (relatedData?.data || []).filter((p) => p.id !== id).slice(0, 2)
 
@@ -40,17 +42,41 @@ export function ContentDetailPage({ contentType }: Readonly<Props>) {
           ) : (
             <article className="max-w-4xl mx-auto space-y-6">
               <Badge variant="highlight">{contentTypeLabel[contentType]}</Badge>
-              <h1 className="text-4xl font-bold">{post.title}</h1>
+              <h1 className="text-4xl font-bold">{externalDetail?.title || post.title}</h1>
               <div className="text-sm text-muted-foreground flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US')}
               </div>
+              {post.sourceName && <Badge variant="outline">{post.sourceName}</Badge>}
               {post.featuredImage && (
                 <div className="relative aspect-video rounded-xl overflow-hidden border">
                   <Image src={post.featuredImage} alt={post.title} fill className="object-cover" unoptimized />
                 </div>
               )}
-              <div className="prose prose-lg dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: post.content || '' }} />
+              {post.externalNews ? (
+                <>
+                  {isExternalLoading ? (
+                    <p className="text-muted-foreground">Loading external content...</p>
+                  ) : isExternalError || !externalDetail ? (
+                    <div className="space-y-3">
+                      <p className="text-muted-foreground">
+                        Không thể tải nội dung chi tiết từ nguồn ngoài lúc này.
+                      </p>
+                      {post.sourceUrl && (
+                        <Button asChild>
+                          <a href={post.sourceUrl} target="_blank" rel="noreferrer">
+                            Mở bài gốc
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="prose prose-lg dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: externalDetail.contentHtml }} />
+                  )}
+                </>
+              ) : (
+                <div className="prose prose-lg dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: post.content || '' }} />
+              )}
             </article>
           )}
         </section>

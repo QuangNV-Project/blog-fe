@@ -10,6 +10,7 @@ export const blogKeys = {
   list: (params?: BlogFilterParams) => [...blogKeys.lists(), params] as const,
   details: () => [...blogKeys.all, 'detail'] as const,
   detail: (id: number) => [...blogKeys.details(), id] as const,
+  externalDetail: (url: string) => [...blogKeys.details(), 'external', url] as const,
   detailBySlug: (slug: string) => [...blogKeys.details(), 'slug', slug] as const,
 }
 
@@ -27,6 +28,14 @@ export function useBlogPost(id: number) {
     queryKey: blogKeys.detail(id),
     queryFn: () => blogManagementService.getPostById(id),
     enabled: !!id,
+  })
+}
+
+export function useExternalNewsDetail(url: string | undefined) {
+  return useQuery({
+    queryKey: blogKeys.externalDetail(url ?? ''),
+    queryFn: () => blogManagementService.getExternalNewsDetail(url ?? ''),
+    enabled: Boolean(url),
   })
 }
 
