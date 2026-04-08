@@ -1,5 +1,7 @@
 import { ContentDetailPage } from '@/components/content/content-detail-page'
 
-export default function Page() {
+const Page = () => {
   return <ContentDetailPage contentType="gallery" />
-}
+};
+
+export default Page;
